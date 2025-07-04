@@ -10,7 +10,7 @@ Here is the result I achieved with my implementation: the camera branch was succ
 </p>
 
 <p align="center">
-  <em>Left: original image with mask &nbsp;&nbsp;|&nbsp;&nbsp; Middle: intermediate result &nbsp;&nbsp;|&nbsp;&nbsp; Right: final result</em>
+  <em>Left: image at the beginning of the algorithm &nbsp;&nbsp;|&nbsp;&nbsp; Middle: intermediate result &nbsp;&nbsp;|&nbsp;&nbsp; Right: final result</em>
 </p>
 
 ---
