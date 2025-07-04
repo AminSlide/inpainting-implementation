@@ -1,86 +1,86 @@
 # 🖼️ Image Inpainting with Criminisi’s Algorithm
 
-This repository provides a Python implementation of **exemplar-based image inpainting** using the algorithm described by Criminisi et al. in their paper:
+This repository contains a Python implementation of the exemplar-based inpainting algorithm described by Criminisi et al. in their 2004 paper:
 
 📄 *Region Filling and Object Removal by Exemplar-Based Image Inpainting*  
-[Criminisi, Pérez & Toyama, 2004 – Microsoft Research](https://www.microsoft.com/en-us/research/publication/object-removal-by-exemplar-based-inpainting/)
+[Microsoft Research](https://www.microsoft.com/en-us/research/publication/object-removal-by-exemplar-based-inpainting/)
 
 ---
 
 ## 📌 Objective
 
-The goal is to reconstruct missing regions in an image (defined by a binary mask) by filling them with similar patches from the known region, following a mathematically defined priority mechanism.
+The goal is to reconstruct missing regions of an image (defined by a binary mask) by copying the most relevant patches from the known region. The algorithm follows a priority-based filling strategy, which favors areas where image structures (like edges or textures) are most likely to continue smoothly.
 
 ---
 
 ## 🧠 Mathematical Overview
 
-The algorithm fills pixels along the boundary of the target region by computing a **priority score** for each pixel `p`:
+At each iteration, the algorithm selects the **most promising patch** to inpaint based on a **priority function** defined for every pixel `p` on the boundary of the target region:
 
 ### Priority Function
 
     P(p) = C(p) * D(p)
 
+- `P(p)`: Priority of the patch centered at pixel `p`
+- `C(p)`: Confidence term — represents the reliability of surrounding pixels
+- `D(p)`: Data term — promotes the continuation of strong image structures (isophotes)
+
+---
+
+## 🔷 1. Confidence Term `C(p)`
+
+This term reflects how much of the patch `Ψ_p` around pixel `p` is already known. It is calculated as the **average confidence of the known pixels within the patch**:
+
+    C(p) = (1 / |Ψ_p|) * Σ C(q), for all q in Ψ_p ∩ Ω^c
+
 Where:
-- `C(p)`: Confidence term
-- `D(p)`: Data term (structure propagation)
+- `Ψ_p` is the square patch of fixed size centered at pixel `p`
+- `Ω^c` is the known (source) region of the image
+- `|Ψ_p|` is the number of pixels in the patch
+- `C(q)` is the confidence value of pixel `q` (initially 1 for known pixels, 0 for unknown)
 
-![Priority Function](docs/formula_priority.png)
-
----
-
-### 1. Confidence Term `C(p)`
-
-Measures how much of the patch around pixel `p` is already known:
-
-    C(p) = (1 / |Ψ_p|) * ∑_{q ∈ Ψ_p ∩ Ω^c} C(q)
-
-- `Ω^c`: known (source) region  
-- `|Ψ_p|`: size of patch centered at `p`
-
-![Confidence Term](docs/formula_confidence.png)
+🧠 This term ensures that the algorithm prefers to fill patches that are **well surrounded by known pixels**.
 
 ---
 
-### 2. Data Term `D(p)`
+## 🔷 2. Data Term `D(p)`
 
-Encourages the continuation of strong image structures (isophotes) into the missing region:
+This term encourages the propagation of linear structures like edges into the missing region. It is computed using the **dot product between the isophote direction and the boundary normal** at `p`:
 
-    D(p) = |∇I⊥_p ⋅ n_p| / α
+    D(p) = |∇I⊥(p) ⋅ n(p)| / α
 
-- `∇I⊥_p`: isophote at point `p` (direction orthogonal to gradient)  
-- `n_p`: boundary normal at `p`  
-- `α`: normalizing constant (e.g., 255)
+Where:
+- `∇I⊥(p)` is the isophote vector at `p`, i.e., the direction **perpendicular to the gradient** of the image intensity
+- `n(p)` is the **unit normal vector** to the boundary of the missing region at `p`
+- `α` is a normalization constant (typically 255)
 
-![Data Term](docs/formula_data.png)
+📈 The **data term is maximal** when the isophote direction is **aligned with the normal vector**, i.e., when the structure is pointing straight into the region to be filled. This prioritizes pixels where edges are likely to **continue naturally** into the hole.
 
 ---
 
-### 3. Patch Matching
+## 🔷 3. Patch Matching (Exemplar Search)
 
-Once the pixel with highest priority is chosen, its patch `Ψ_p` is filled by copying pixels from the best matching source patch `Ψ_q`:
+Once the pixel `p*` with highest priority is found, the algorithm searches for the **most similar patch `Ψ_q`** in the known region using the **Sum of Squared Differences (SSD)**:
 
-    Ψ_q = argmin_{Ψ_r ∈ Ω^c} SSD(Ψ_p, Ψ_r)
+    Ψ_q = argmin_{Ψ_r ∈ Ω^c} SSD(Ψ_p*, Ψ_r)
 
-Only known pixels are used in the SSD (Sum of Squared Differences) computation.
+- Only the **known pixels** of `Ψ_p*` are used in the SSD computation
+- The matched patch `Ψ_q` is copied into the unknown part of `Ψ_p*`
+
+🎯 This allows the algorithm to **reuse existing textures** in the image in a visually coherent way.
 
 ---
 
 ## 🔁 Algorithm Steps
 
-1. Identify the boundary of the masked region.
-2. Compute `P(p)` for all boundary pixels.
-3. Select the patch `Ψ_p` with highest priority.
-4. Search for best matching patch `Ψ_q` in the known region.
-5. Copy known pixels from `Ψ_q` into the unknown area of `Ψ_p`.
+1. Detect the boundary (`∂Ω`) of the target region (the hole).
+2. For each boundary pixel `p`:
+    - Compute the confidence term `C(p)`
+    - Compute the data term `D(p)`
+    - Compute the priority `P(p) = C(p) * D(p)`
+3. Choose the patch centered at `p*` with the **highest priority**.
+4. Search for the best matching patch in the known region using SSD.
+5. Copy pixels from the source patch to the unknown pixels.
 6. Update the mask and confidence map.
-7. Repeat until the region is fully filled.
+7. Repeat until all missing pixels are filled.
 
----
-
-## ▶️ How to Run
-
-Place your input images and corresponding masks in the appropriate folders:
-
-```bash
-python inpainting.py
