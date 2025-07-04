@@ -1,6 +1,6 @@
 # 🖼️ Image Inpainting with Criminisi’s Algorithm
 
-This repository contains a Python implementation of the exemplar-based inpainting algorithm described by Criminisi et al. in their 2004 paper:
+This repository contains a Python implementation of the exemplar-based inpainting algorithm described by Criminisi et al. in their 2004 paper.
 Here is the result I achieved with my implementation: the camera branch was successfully removed.
 
 <p align="center">
