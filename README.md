@@ -1,9 +1,17 @@
 # 🖼️ Image Inpainting with Criminisi’s Algorithm
 
 This repository contains a Python implementation of the exemplar-based inpainting algorithm described by Criminisi et al. in their 2004 paper:
+Here is the result I achieved with my implementation: the camera branch was successfully removed.
 
-📄 *Region Filling and Object Removal by Exemplar-Based Image Inpainting*  
-[Microsoft Research](https://www.microsoft.com/en-us/research/publication/object-removal-by-exemplar-based-inpainting/)
+<p align="center">
+  <img src="Criminisi Inpainting/résultats/photographe1.png" width="30%">
+  <img src="Criminisi Inpainting/résultats/photographefinal.png" width="30%">
+  <img src="Criminisi Inpainting/résultats/photographelaast.png" width="30%">
+</p>
+
+<p align="center">
+  <em>Left: original image with mask &nbsp;&nbsp;|&nbsp;&nbsp; Middle: intermediate result &nbsp;&nbsp;|&nbsp;&nbsp; Right: final result</em>
+</p>
 
 ---
 
