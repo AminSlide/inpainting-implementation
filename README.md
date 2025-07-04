@@ -1,91 +1,86 @@
 # 🖼️ Image Inpainting with Criminisi’s Algorithm
 
-This repository contains a Python implementation of the exemplar-based image inpainting algorithm proposed by **Antonio Criminisi et al.** in their 2004 paper:  
-📄 *Region Filling and Object Removal by Exemplar-Based Image Inpainting* ([paper link](https://www.microsoft.com/en-us/research/publication/object-removal-by-exemplar-based-inpainting/))
+This repository provides a Python implementation of **exemplar-based image inpainting** using the algorithm described by Criminisi et al. in their paper:
+
+📄 *Region Filling and Object Removal by Exemplar-Based Image Inpainting*  
+[Criminisi, Pérez & Toyama, 2004 – Microsoft Research](https://www.microsoft.com/en-us/research/publication/object-removal-by-exemplar-based-inpainting/)
 
 ---
 
 ## 📌 Objective
 
-The goal is to **reconstruct missing regions** in an image (defined by a binary mask) by copying similar patches from the known region, using a priority-driven mechanism. The algorithm fills the missing area **iteratively**, starting from the most “promising” pixels along the boundary.
+The goal is to reconstruct missing regions in an image (defined by a binary mask) by filling them with similar patches from the known region, following a mathematically defined priority mechanism.
 
 ---
 
 ## 🧠 Mathematical Overview
 
-The algorithm relies on a **priority function** defined for each boundary point \( p \) of the target region:
+The algorithm fills pixels along the boundary of the target region by computing a **priority score** for each pixel `p`:
 
-\[
-P(p) = C(p) \cdot D(p)
-\]
+### Priority Function
 
-- \( C(p) \): **Confidence term** – how reliable the pixel's neighborhood is.
-- \( D(p) \): **Data term** – how strong the image structure (isophote) is at point \( p \).
+    P(p) = C(p) * D(p)
 
----
+Where:
+- `C(p)`: Confidence term
+- `D(p)`: Data term (structure propagation)
 
-### 1. Confidence Term \( C(p) \)
-
-Measures how much information around pixel \( p \) is already known. For a patch \( \Psi_p \) centered at \( p \):
-
-\[
-C(p) = \frac{1}{|\Psi_p|} \sum_{q \in \Psi_p \cap \Omega^c} C(q)
-\]
-
-- \( \Omega^c \): known (source) region.
-- \( |\Psi_p| \): area of the patch.
+![Priority Function](docs/formula_priority.png)
 
 ---
 
-### 2. Data Term \( D(p) \)
+### 1. Confidence Term `C(p)`
 
-Encourages continuation of linear structures (isophotes) into the target region:
+Measures how much of the patch around pixel `p` is already known:
 
-\[
-D(p) = \frac{|\nabla I^{\perp}_p \cdot n_p|}{\alpha}
-\]
+    C(p) = (1 / |Ψ_p|) * ∑_{q ∈ Ψ_p ∩ Ω^c} C(q)
 
-- \( \nabla I^{\perp}_p \): isophote at point \( p \) (i.e., direction perpendicular to the image gradient).
-- \( n_p \): normal vector to the boundary at \( p \).
-- \( \alpha \): normalizing factor (e.g. 255).
+- `Ω^c`: known (source) region  
+- `|Ψ_p|`: size of patch centered at `p`
 
-In practice:
-- The **isophote** is computed via the image gradient:
-  \[
-  \nabla I = \left[ \frac{\partial I}{\partial x}, \frac{\partial I}{\partial y} \right]
-  \]
-  and rotated by 90° (via cross product with the z-axis).
-  
-- The **normal** to the contour is calculated from boundary points using:
-  \[
-  n_p = \frac{(p_{i+1} - p_i) \times \mathbf{z}}{\| (p_{i+1} - p_i) \times \mathbf{z} \|}
-  \]
+![Confidence Term](docs/formula_confidence.png)
 
 ---
 
-## 🔁 Inpainting Loop
+### 2. Data Term `D(p)`
 
-The following steps are repeated until the mask is fully filled:
+Encourages the continuation of strong image structures (isophotes) into the missing region:
 
-1. **Extract boundary** \( \delta \Omega \) of the target region.
-2. **Compute priority** \( P(p) \) for each \( p \in \delta \Omega \).
-3. Select the patch \( \Psi_p \) with **maximum priority**.
-4. Find the best matching source patch \( \Psi_q \in \Omega^c \) by minimizing the **Sum of Squared Differences (SSD)**:
-   \[
-   \Psi_q = \arg\min_{\Psi_r \in \Omega^c} \| \Psi_r - \Psi_p \|^2
-   \]
-   (only over known pixels).
-5. Copy pixels from \( \Psi_q \) to the unknown pixels of \( \Psi_p \).
-6. Update confidence map \( C(p) \) and the mask.
+    D(p) = |∇I⊥_p ⋅ n_p| / α
+
+- `∇I⊥_p`: isophote at point `p` (direction orthogonal to gradient)  
+- `n_p`: boundary normal at `p`  
+- `α`: normalizing constant (e.g., 255)
+
+![Data Term](docs/formula_data.png)
 
 ---
 
-## 🗂️ Project Structure
+### 3. Patch Matching
+
+Once the pixel with highest priority is chosen, its patch `Ψ_p` is filled by copying pixels from the best matching source patch `Ψ_q`:
+
+    Ψ_q = argmin_{Ψ_r ∈ Ω^c} SSD(Ψ_p, Ψ_r)
+
+Only known pixels are used in the SSD (Sum of Squared Differences) computation.
+
+---
+
+## 🔁 Algorithm Steps
+
+1. Identify the boundary of the masked region.
+2. Compute `P(p)` for all boundary pixels.
+3. Select the patch `Ψ_p` with highest priority.
+4. Search for best matching patch `Ψ_q` in the known region.
+5. Copy known pixels from `Ψ_q` into the unknown area of `Ψ_p`.
+6. Update the mask and confidence map.
+7. Repeat until the region is fully filled.
+
+---
+
+## ▶️ How to Run
+
+Place your input images and corresponding masks in the appropriate folders:
 
 ```bash
-.
-├── images/             # Input images to inpaint
-├── masks/              # Binary masks (_mask.jpg) for target regions
-├── output/             # Output images and debug visualizations
-├── inpainting.py       # Main class implementing Criminisi's algorithm
-└── README.md           # This file
+python inpainting.py
