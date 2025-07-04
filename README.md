@@ -21,6 +21,7 @@ At each iteration, the algorithm selects the **most promising patch** to inpaint
 
     P(p) = C(p) * D(p)
 
+Where:
 - `P(p)`: Priority of the patch centered at pixel `p`
 - `C(p)`: Confidence term — represents the reliability of surrounding pixels
 - `D(p)`: Data term — promotes the continuation of strong image structures (isophotes)
@@ -34,9 +35,9 @@ This term reflects how much of the patch `Ψ_p` around pixel `p` is already know
     C(p) = (1 / |Ψ_p|) * Σ C(q), for all q in Ψ_p ∩ Ω^c
 
 Where:
-- `Ψ_p` is the square patch of fixed size centered at pixel `p`
+- `Ψ_p` is the square patch centered at pixel `p`
 - `Ω^c` is the known (source) region of the image
-- `|Ψ_p|` is the number of pixels in the patch
+- `|Ψ_p|` is the total number of pixels in the patch
 - `C(q)` is the confidence value of pixel `q` (initially 1 for known pixels, 0 for unknown)
 
 🧠 This term ensures that the algorithm prefers to fill patches that are **well surrounded by known pixels**.
@@ -50,24 +51,27 @@ This term encourages the propagation of linear structures like edges into the mi
     D(p) = |∇I⊥(p) ⋅ n(p)| / α
 
 Where:
-- `∇I⊥(p)` is the isophote vector at `p`, i.e., the direction **perpendicular to the gradient** of the image intensity
+- `∇I⊥(p)` is the isophote at point `p`, i.e., the direction perpendicular to the image gradient
 - `n(p)` is the **unit normal vector** to the boundary of the missing region at `p`
 - `α` is a normalization constant (typically 255)
 
-📈 The **data term is maximal** when the isophote direction is **aligned with the normal vector**, i.e., when the structure is pointing straight into the region to be filled. This prioritizes pixels where edges are likely to **continue naturally** into the hole.
+📈 The **data term is maximal** when the isophote direction is **aligned with the normal vector**, i.e., when the structure points directly into the hole. This prioritizes pixels where edges are likely to **continue naturally**.
 
 ---
 
 ## 🔷 3. Patch Matching (Exemplar Search)
 
-Once the pixel `p*` with highest priority is found, the algorithm searches for the **most similar patch `Ψ_q`** in the known region using the **Sum of Squared Differences (SSD)**:
+Once the pixel `p*` with highest priority is chosen, the algorithm finds the **most similar source patch** `Ψ_q` in the known region using **Sum of Squared Differences (SSD)**, computed only over known pixels:
 
-    Ψ_q = argmin_{Ψ_r ∈ Ω^c} SSD(Ψ_p*, Ψ_r)
+### SSD Formula
 
-- Only the **known pixels** of `Ψ_p*` are used in the SSD computation
-- The matched patch `Ψ_q` is copied into the unknown part of `Ψ_p*`
+    SSD(Ψ_p, Ψ_q) = Σ [I_p(i) - I_q(i)]², for all i ∈ K
 
-🎯 This allows the algorithm to **reuse existing textures** in the image in a visually coherent way.
+Where:
+- `I_p(i)` and `I_q(i)` are the intensities at pixel `i` in patches `Ψ_p` and `Ψ_q`, respectively
+- `K` is the set of **known pixels** in `Ψ_p` (unknown pixels are ignored)
+
+🎯 The source patch `Ψ_q` with the smallest SSD is selected, and its known pixels are copied into the corresponding unknown locations in `Ψ_p`.
 
 ---
 
@@ -84,3 +88,11 @@ Once the pixel `p*` with highest priority is found, the algorithm searches for t
 6. Update the mask and confidence map.
 7. Repeat until all missing pixels are filled.
 
+---
+
+## ▶️ How to Run
+
+Make sure your images and corresponding binary masks are in the correct folders:
+
+```bash
+python inpainting.py
