@@ -27,7 +27,7 @@ At each iteration, the algorithm selects the **most promising patch** to inpaint
 
 ### Priority Function
 \begin{center}
-  \includegraphics[width=0.5\textwidth]{Criminisi Inpainting/images/formule1.png}
+  \includegraphics[width=0.5\textwidth]{"Criminisi Inpainting/images/formule1.png"}
 \end{center}
 
 ---
