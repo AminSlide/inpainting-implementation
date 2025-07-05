@@ -45,12 +45,8 @@ This term reflects how much of the patch `Ψ_p` around pixel `p` is already know
 
 This term encourages the propagation of linear structures like edges into the missing region. It is computed using the **dot product between the isophote direction and the boundary normal** at `p`:
 
-    D(p) = |∇I⊥(p) ⋅ n(p)| / α
+![Priority Formula](Criminisi%20Inpainting/images/formule3.png)
 
-Where:
-- `∇I⊥(p)` is the isophote at point `p`, i.e., the direction perpendicular to the image gradient
-- `n(p)` is the **unit normal vector** to the boundary of the missing region at `p`
-- `α` is a normalization constant (typically 255)
 
 📈 The **data term is maximal** when the isophote direction is **aligned with the normal vector**, i.e., when the structure points directly into the hole. This prioritizes pixels where edges are likely to **continue naturally**.
 
