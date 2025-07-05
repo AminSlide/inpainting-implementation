@@ -63,6 +63,7 @@ Once the pixel `p*` with highest priority is chosen, the algorithm finds the **m
 ### Patch Selection
 
 ![Priority Formula](Criminisi%20Inpainting/images/formule5.png)
+
 This means: the algorithm searches over all candidate patches `Ψ_r` fully contained in the known region `Ω^c`, and selects the one that minimizes the SSD with `Ψ_p`. Only the pixels in `Ψ_p` that are known (not masked) are used in the comparison.
 
 🎯 The selected source patch `Ψ_q` is then used to copy pixel values into the unknown parts of `Ψ_p`.
