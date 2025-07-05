@@ -27,12 +27,9 @@ At each iteration, the algorithm selects the **most promising patch** to inpaint
 
 ### Priority Function
 
-    P(p) = C(p) * D(p)
-
-Where:
-- `P(p)`: Priority of the patch centered at pixel `p`
-- `C(p)`: Confidence term — represents the reliability of surrounding pixels
-- `D(p)`: Data term — promotes the continuation of strong image structures (isophotes)
+\begin{center}
+  \includegraphics[width=0.5\textwidth]{Criminisi Inpainting/images/formule1.PNG}
+\end{center}
 
 ---
 
