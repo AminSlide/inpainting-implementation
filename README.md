@@ -58,16 +58,11 @@ Once the pixel `p*` with highest priority is chosen, the algorithm finds the **m
 
 ### SSD Formula
 
-    SSD(Ψ_p, Ψ_q) = Σ [I_p(i) - I_q(i)]², for all i ∈ K
-
-Where:
-- `I_p(i)` and `I_q(i)` are the intensities at pixel `i` in patches `Ψ_p` and `Ψ_q`, respectively
-- `K` is the set of **known pixels** in `Ψ_p` (unknown pixels are ignored)
+![Priority Formula](Criminisi%20Inpainting/images/formule4.png)
 
 ### Patch Selection
 
-    Ψ_q = argmin_{Ψ_r ∈ Ω^c} SSD(Ψ_p, Ψ_r)
-
+![Priority Formula](Criminisi%20Inpainting/images/formule5.png)
 This means: the algorithm searches over all candidate patches `Ψ_r` fully contained in the known region `Ω^c`, and selects the one that minimizes the SSD with `Ψ_p`. Only the pixels in `Ψ_p` that are known (not masked) are used in the comparison.
 
 🎯 The selected source patch `Ψ_q` is then used to copy pixel values into the unknown parts of `Ψ_p`.
