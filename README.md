@@ -34,13 +34,8 @@ At each iteration, the algorithm selects the **most promising patch** to inpaint
 
 This term reflects how much of the patch `Ψ_p` around pixel `p` is already known. It is calculated as the **average confidence of the known pixels within the patch**:
 
-    C(p) = (1 / |Ψ_p|) * Σ C(q), for all q in Ψ_p ∩ Ω^c
+![Priority Formula](Criminisi%20Inpainting/images/formule2.png)
 
-Where:
-- `Ψ_p` is the square patch centered at pixel `p`
-- `Ω^c` is the known (source) region of the image
-- `|Ψ_p|` is the total number of pixels in the patch
-- `C(q)` is the confidence value of pixel `q` (initially 1 for known pixels, 0 for unknown)
 
 🧠 This term ensures that the algorithm prefers to fill patches that are **well surrounded by known pixels**.
 
