@@ -26,9 +26,7 @@ The goal is to reconstruct missing regions of an image (defined by a binary mask
 At each iteration, the algorithm selects the **most promising patch** to inpaint based on a **priority function** defined for every pixel `p` on the boundary of the target region:
 
 ### Priority Function
-\begin{center}
-  \includegraphics[width=0.5\textwidth]{"Criminisi Inpainting/images/formule1.png"}
-\end{center}
+![Priority Formula](Criminisi%20Inpainting/images/formule1.png)
 
 ---
 
